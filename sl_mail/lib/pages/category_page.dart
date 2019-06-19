@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_shop/provide/child_category.dart';
+import '../provide/child_category.dart';
 import '../config/service_url.dart';
 import '../service/service_method.dart';
 import 'dart:convert';

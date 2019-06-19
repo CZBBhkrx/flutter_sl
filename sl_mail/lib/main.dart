@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop/provide/child_category.dart';
+import './provide/child_category.dart';
 import 'package:provide/provide.dart';
 import './pages/index_page.dart';
 

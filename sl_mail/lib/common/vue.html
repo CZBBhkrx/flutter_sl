@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script>
+        //发布者
+        class Vue {
+            constructor(options) {
+                this.options = options;
+                this.$data = options.data;
+                this.$el = document.querySelector(options.el);
+                this._directive = {} ; // 容器存放订阅者
+                //{mytext:[1,2],mybox:[3,4]}
+
+
+
+                this.Observer(this.data);
+                this.Complie(this.$el)
+            }
+            //数据劫持
+            // data:{
+            //     mytext:"",
+            //     mybox:"",
+            // }
+            Observer(data) {
+                for(let k in data){
+                    this._directive[key] = [];
+                    //此时要进行数据的劫持 需要修改data属性的get  set// 做代理
+                    //vue对象没有update方法  但是有watch对象实例的update方法
+
+                    let val = data[key];
+                    let watch = this._directive[key];
+                    Object.defineProperty(this.$data,key,{
+                        get:function(){
+                            console.log(val)
+                        },
+                        set:function(newValue){
+                            if(newValue!==val){
+                                val = newValue;
+                                watch.forEach(element => {
+                                    element.update();
+                                });
+                            }
+                        }
+                    })
+                }
+            }
+            //解析指令
+            //找指令   依赖收集 好去订阅data里边的属性-->进行数据更新
+            Complie(el) {
+                let nodes = el.children;  //app 下面的节点dom  对象
+                for(let i = 0 ;i < nodes.length;i++){
+                    let node = nodes[i];
+                    //递归 查找一遍所有的节点是否含有指令
+                    if(node.children.length){
+                        this.Complie(node)
+                    }
+                    if(node.hasAttribute("v-text")){
+                        let attrVal = node.getAttribute('v-text'); //mytext
+                        //node  当前元素对象
+                        // attrVal  当前元素的指令的值
+                        this._directive[attrVal].push(new Watcher(node,this, attrVal,"innerHTML"));  //push 一个订阅者
+                        console.log(1)
+                    }
+                    if (node.hasAttribute("v-model")) {
+                         let attrVal = node.getAttribute('v-model'); //mytext
+                        //node  当前元素对象
+                        // attrVal  当前元素的指令的值
+                        this._directive[attrVal].push(new Watcher(node, this, attrVal, "value"));  //push 一个订阅者
+                        var self = this
+                        node.addeventListener("input",function(){
+                            self.$data[attrVal] = node.value;  //给数据赋值
+                        })
+                    }
+                }
+
+
+            }
+        }
+        //订阅者  更新识图
+        class Watcher{
+            constructor(el,vm,exp,attr) {
+                this.el = el;  //元素对象div
+                this.vm = vm;
+                this.exp = exp;
+                this.attr = attr;
+                this.updata()
+            }
+            updata(){
+                this.el[this.attr] = this.vm.$data[this.exp];
+            }
+        }
+
+    </script>
+    <script>
+    const app = new Vue({
+
+
+    })
+    </script>
+</head>
+
+<body>
+
+
+
+</body>
+
+</html>
