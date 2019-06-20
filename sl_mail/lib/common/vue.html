@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>发布者-订阅者 + 数据劫持(vue双向数据绑定的原理)</title>
     <script>
         //发布者
         class Vue {
@@ -15,34 +14,26 @@
                 this.$el = document.querySelector(options.el);
                 this._directive = {} ; // 容器存放订阅者
                 //{mytext:[1,2],mybox:[3,4]}
-
-
-
-                this.Observer(this.data);
+                this.Observer(this.$data);
                 this.Complie(this.$el)
             }
-            //数据劫持
-            // data:{
-            //     mytext:"",
-            //     mybox:"",
-            // }
             Observer(data) {
-                for(let k in data){
+                for(let key in data){
                     this._directive[key] = [];
                     //此时要进行数据的劫持 需要修改data属性的get  set// 做代理
                     //vue对象没有update方法  但是有watch对象实例的update方法
-
                     let val = data[key];
                     let watch = this._directive[key];
                     Object.defineProperty(this.$data,key,{
                         get:function(){
+                            return val
                             console.log(val)
                         },
                         set:function(newValue){
                             if(newValue!==val){
                                 val = newValue;
                                 watch.forEach(element => {
-                                    element.update();
+                                    element.updata();
                                 });
                             }
                         }
@@ -64,7 +55,7 @@
                         //node  当前元素对象
                         // attrVal  当前元素的指令的值
                         this._directive[attrVal].push(new Watcher(node,this, attrVal,"innerHTML"));  //push 一个订阅者
-                        console.log(1)
+                        console.log(this._directive[attrVal])
                     }
                     if (node.hasAttribute("v-model")) {
                          let attrVal = node.getAttribute('v-model'); //mytext
@@ -72,13 +63,11 @@
                         // attrVal  当前元素的指令的值
                         this._directive[attrVal].push(new Watcher(node, this, attrVal, "value"));  //push 一个订阅者
                         var self = this
-                        node.addeventListener("input",function(){
+                        node.addEventListener("input",function(){
                             self.$data[attrVal] = node.value;  //给数据赋值
                         })
                     }
                 }
-
-
             }
         }
         //订阅者  更新识图
@@ -94,20 +83,23 @@
                 this.el[this.attr] = this.vm.$data[this.exp];
             }
         }
-
-    </script>
-    <script>
-    const app = new Vue({
-
-
-    })
     </script>
 </head>
-
 <body>
-
-
-
+    <div id="app">
+        <div  v-text='mytext'></div>
+        <div v-text='mybox'></div>
+        <input type="text" v-model="mytext">
+        <input type="text" v-model="mybox">
+    </div>
+    <script>
+        const app = new Vue({
+            el:"#app",
+            data: {
+                mytext: "hello",
+                mybox: "world",
+            }
+        })
+    </script>
 </body>
-
 </html>
